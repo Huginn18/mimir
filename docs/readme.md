@@ -20,3 +20,12 @@ This one is self-explanatory.
 `pm` module is used to track and manage projects. Projects manifest is used by the rest of the `mimir` modules.
 ## CV Generator
 	TBU
+
+# Config
+`mimir` has really simple config file called `.mimirrc` which is stored in `~/.config/` directory.
+## Contents
+`.mimirrc` stores two fields for every module.
+### Status
+This field shouldn't be modified by the user. It is used to determine if module was initialized and if so if it is active.
+### Custom paths
+This list stores paths to all directories set up by the user.
