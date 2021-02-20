@@ -18,6 +18,8 @@ This one is self-explanatory.
 `est` module is used for creation of project's budget/estimation sheet.
 ## Project Management
 `pm` module is used to track and manage projects. Projects manifest is used by the rest of the `mimir` modules.
+
+[Read more](project.md)
 ## CV Generator
 	TBU
 
