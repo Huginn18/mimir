@@ -1,2 +1,4 @@
+from core.mimirshell import MimirShell
+
 if __name__ == '__main__':
-    print('hello world')
+    MimirShell().cmdloop()
