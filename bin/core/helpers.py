@@ -35,5 +35,13 @@ class FileManager():
             file.write(content)
         return True
 
+    def load_file(_path):
+        full_path = _path
+        if full_path[0] == '~':
+            full_path = path.expanduser(full_path)
+
+        with open(full_path, 'r') as file:
+            return file.read()
+
     def __expand_path(_path):
         return path.expanduser(_path)
