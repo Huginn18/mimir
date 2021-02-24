@@ -36,7 +36,10 @@ class MimirShell(Cmd):
         print(self.do_quit.__doc__)
 
     def do_pm(self, arg):
-        print(arg)
+        self.pm.process_command(arg)
+
+    def help_pm(self):
+        print(self.pm.process_command.__doc__)
 
 
 # === == = == === == = == ===
