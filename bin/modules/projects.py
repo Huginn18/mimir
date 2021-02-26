@@ -41,6 +41,8 @@ class Pm():
             self.__process_new_command(args)
         elif args[0] == 'list':
             self.__process_list_command(args)
+        elif args[0] == 'add':
+            self.__process_add_command(args)
         else:
             print(f"Unknown command 'pm {args[0]}'.")
 
@@ -53,8 +55,7 @@ class Pm():
         path = args[2]
         print(f"project name: {project_name}\npath: {path}")
         # check if directory or project exists
-        projects = [p for p in self.manifest if p.name == project_name]
-        if len(projects) != 0:
+        if self.__project_in_manifest(project_name):
             print(
                 f"Project {project_name} already exists. Please provide different name."
             )
@@ -94,9 +95,52 @@ class Pm():
 
         print(list)
 
+    def __process_add_command(self, args):
+        print(len(args))  # 3
+        if len(args) > 3 or len(args) < 3:
+            print(f"`pm add` takes 3 arguments. {len(args)} were provided.")
+            return
+
+        project_name = args[1]
+        project_path = args[2]
+        print(f"project name: {project_name}\npath: {project_path}")
+
+        if FileManager.directory_exists(project_path) == False:
+            print(
+                f"Directory {project_path} doesn't exist.\n To create project use `pm new` command."
+            )
+            return
+        if self.__project_in_manifest(project_name):
+            print(
+                f"Project {project_name} already exists. Please provide different name."
+            )
+            return
+
+        self.__add_project_to_manifest(project_name, project_path)
+        # ask for git
+        if FileManager.directory_exists(os.path.join(project_path, '.git')):
+            print("Git detected in directory")
+            return
+        else:
+            while True:
+                decision = helpers.ask(
+                    "Do you want to init git in the project?\n[y]es/[n]o")
+                if decision == 'y' or decision == 'yes':
+                    use_git = True
+                    break
+                elif decision == 'n' or decision == 'no':
+                    return
+            Git.create_repo(project_path, project_name)
+            Git.first_commit(project_path)
+
+
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
+
+    def __project_in_manifest(self, project_name):
+        projects = [p for p in self.manifest if p.name == project_name]
+        return len(projects) == 1
 
     def __add_project_to_manifest(self, project_name, path):
         p = PmElement()

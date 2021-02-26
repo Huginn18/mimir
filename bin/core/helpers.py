@@ -84,7 +84,7 @@ class Git():
 
         os.chdir(path.expanduser(_path))
         subprocess.check_output(['git', 'add', '.'])
-        subprocess.check_output(['git', 'commit', '-m', "'created readme.me'"])
+        subprocess.check_output(['git', 'commit', '-m', "'initial commit'"])
         subprocess.check_output([
             'git', 'push', '--set-upstream', 'origin',
             subprocess.check_output(['git', 'branch'
