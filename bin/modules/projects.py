@@ -39,6 +39,8 @@ class Pm():
             return
         if args[0] == 'new':
             self.__process_new_command(args)
+        elif args[0] == 'list':
+            self.__process_list_command(args)
         else:
             print(f"Unknown command 'pm {args[0]}'.")
 
@@ -79,6 +81,18 @@ class Pm():
             Git.first_commit(path)
             self.__add_project_to_manifest(project_name, path)
 
+    def __process_list_command(self, args):
+        if len(args) != 1:
+            print(
+                f"'pm list' doesn't take arguements. {len(args)-1} were provided."
+            )
+            return
+
+        list = ''
+        for p in self.manifest:
+            list += f"{p.name} [{p.path}]\n"
+
+        print(list)
 
 # === == = == === == = == ===
 #       REGION: Manifest
