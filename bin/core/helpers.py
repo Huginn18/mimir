@@ -1,5 +1,15 @@
+from git import Repo
 import os
 from os import path
+import subprocess
+
+
+def ask(question):
+    anwser = ''
+    while True:
+        anwser = input(question)
+        if anwser != '':
+            return anwser
 
 
 class FileManager():
@@ -45,3 +55,38 @@ class FileManager():
 
     def __expand_path(_path):
         return path.expanduser(_path)
+
+
+class Git():
+    def create_repo(_path, project_name):
+        privacy = ''
+        while True:
+            decision = ask(
+                "Visibility:\n[1] public\n[2] private\n[3] internal\n")
+            if decision == '1':
+                privacy = '--public'
+                break
+            elif decision == '2':
+                privacy = '--private'
+                break
+            elif decision == '3':
+                privacy = '--internal'
+                break
+        os.chdir(os.path.expanduser(os.path.dirname(_path)))
+
+        subprocess.check_output(
+            ['gh', 'repo', 'create', project_name, '--confirm', privacy])
+        #
+    def first_commit(_path):
+        readme_path = path.expanduser(path.join(_path, 'readme.md'))
+        with open(readme_path, 'w') as file:
+            file.write(f"# {readme_path.split('/')[-1]}")
+
+        os.chdir(path.expanduser(_path))
+        subprocess.check_output(['git', 'add', '.'])
+        subprocess.check_output(['git', 'commit', '-m', "'created readme.me'"])
+        subprocess.check_output([
+            'git', 'push', '--set-upstream', 'origin',
+            subprocess.check_output(['git', 'branch'
+                                     ]).split()[-1].__str__().split("'")[-2]
+        ])
