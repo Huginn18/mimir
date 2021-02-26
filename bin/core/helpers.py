@@ -32,6 +32,18 @@ class FileManager():
 
         os.mkdir(full_path)
 
+    def delete_directory(_path):
+        full_path = _path
+        if full_path[0] == '~':
+            full_path = FileManager.__expand_path(full_path)
+
+        try:
+            import shutil
+            shutil.rmtree(full_path, ignore_errors=True)
+            print(f"Delted directory {full_path}")
+        except OSError as e:
+            print("Error: %s : %s" % (full_path, e.strerror))
+
     def try_create_file(path, content='', override=False):
         full_path = FileManager.__expand_path(path)
         if FileManager.file_exists(full_path):

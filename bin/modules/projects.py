@@ -43,6 +43,8 @@ class Pm():
             self.__process_list_command(args)
         elif args[0] == 'add':
             self.__process_add_command(args)
+        elif args[0] == 'delete':
+            self.__process_delete_command(args)
         else:
             print(f"Unknown command 'pm {args[0]}'.")
 
@@ -96,7 +98,6 @@ class Pm():
         print(list)
 
     def __process_add_command(self, args):
-        print(len(args))  # 3
         if len(args) > 3 or len(args) < 3:
             print(f"`pm add` takes 3 arguments. {len(args)} were provided.")
             return
@@ -133,10 +134,49 @@ class Pm():
             Git.create_repo(project_path, project_name)
             Git.first_commit(project_path)
 
+    def __process_delete_command(self, args):
+        if len(args) > 2:
+            print(
+                f"'pm delete' takes only 1 argument. {len(args)-1} were provided."
+            )
+            return
+        if len(args) == 1:
+            print(f"Please provide project name")
+            return
+
+        project_name = args[1]
+        if self.__project_in_manifest(project_name) == False:
+            print(f"Unknown project {project_name}")
+            return
+
+        project = self.__get_project_from_manifest(project_name)
+        delete_dir = False
+        while True:
+            decision = helpers.ask(
+                f"Do you want to delete project directory from your hard drive ({project.path})?\n[y]es/[n]o\n"
+            )
+            if decision == 'y' or decision == 'yes':
+                delete_dir = True
+                break
+            elif decision == 'n' or decision == 'no':
+                break
+        if delete_dir:
+            FileManager.delete_directory(project.path)
+
+        projects = [p for p in self.manifest if p.name != project_name]
+        self.manifest = PmManifest(projects)
+        self.__update_manifest_file()
+        print(f"Project {project.name} removed.")
+        self.__update_manifest_file()
+
 
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
+
+    def __get_project_from_manifest(self, project_name):
+        projects = [p for p in self.manifest if p.name == project_name]
+        return projects[0]
 
     def __project_in_manifest(self, project_name):
         projects = [p for p in self.manifest if p.name == project_name]
