@@ -8,6 +8,8 @@ If you want to investigate my thought process and whole development process chec
 # Features
 ## Quicknote
 `qn` module is used to make quick, short term notes. `qn` notes can be organized into multiple separate directories. Default directory for `qn` files is `~/.config/.mimir.d/qn/`.
+
+[Read more](quicknote.md)
 ## Log
 `log` module is used to keep logs/journals both private and about projects. `log` is can be used in tandem with projects module (projects created with `project` module will be also used inside `log` module). Default directory for `log` files is `~/.config/.mimir.d/log/`.
 ## ToDo
