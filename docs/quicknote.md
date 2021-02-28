@@ -11,7 +11,7 @@
 | delete <note name> | deletes note |
 | save | commits all changes and pushes them to the repo. Available only if `git` support is turned on. |
 | rename <note name> <new note name> | renames note from <note name> to <new note name> |
-
+| find <keyword> | prints list of all the notes containing <keyword> in their name |
 ### `qn new`
 `qn new <note name> <-s>` | creates file for `note name` and opens it in vim. If `-s` argument is used note won't be opened in the editor.
 #### Arguments

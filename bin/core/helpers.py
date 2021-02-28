@@ -1,6 +1,6 @@
 from git import Repo
 import os
-from os import path, environ
+from os import path, environ, remove
 from subprocess import call
 import subprocess
 
@@ -70,6 +70,12 @@ class FileManager():
 
         with open(full_path, 'r') as file:
             return file.read()
+
+    def delete_file(_path):
+        full_path = _path
+        if full_path[0] == '`':
+            full_path = path.expanduser(full_path)
+        remove(full_path)
 
     def __expand_path(_path):
         return path.expanduser(_path)

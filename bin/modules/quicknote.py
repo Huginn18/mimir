@@ -1,5 +1,5 @@
-from core.helpers import FileManager
-from os import path, environ
+from core.helpers import FileManager, open_vim
+from os import path, environ, listdir, remove
 from subprocess import call
 from yamlize import Sequence, Object, Attribute
 
@@ -36,6 +36,7 @@ class Qn():
             delete <note name>                  | deletes note
             save                                | commits all changes and pushes them to repo. Available only if git support is turned on.
             rename <note name> <new note name>  | renames note to 'new note name'
+            find <keyword>                      | prints list of all the notes containing 'keyoword' in their name
         """
         args = arg.split()
         if len(args) == 0:
@@ -47,6 +48,8 @@ class Qn():
             self.__process_edit_command(args)
         elif args[0] == 'list':
             self.__process_list_command(args)
+        elif args[0] == 'delete':
+            self.__process_delete_command(args)
         else:
             print(f"Unknown command 'qn {args[0]}'")
 
@@ -115,6 +118,26 @@ class Qn():
 
         for n in self.manifest:
             print(n.name)
+
+    def __process_delete_command(self, args):
+        if len(args) == 1:
+            print('Please provide note name to be deleted.')
+            return
+        elif len(args) > 2:
+            print(
+                f"'qn delete` takes one argument. {len(args)-1} were provided."
+            )
+            return
+
+        note_name = args[1]
+        if self.manifest.contains(note_name) == False:
+            print(f"Unknown note {note_name}")
+
+        self.__remove_note_from_manifest(note_name)
+        note_path = path.join(self.data_path, f"{note_name}.md")
+        FileManager.delete_file(note_path)
+        print(f"Note {note_name} was deleted")
+
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
@@ -140,6 +163,11 @@ class Qn():
         self.manifest = QnManifest()
         for f in files:
             self.__add_to_manifest(f.split('.')[0])
+        self.__save_manifest()
+
+    def __remove_note_from_manifest(self, note_name):
+        notes = [n for n in self.manifest if n.name != note_name]
+        self.manifest = QnManifest(notes)
         self.__save_manifest()
 
 
