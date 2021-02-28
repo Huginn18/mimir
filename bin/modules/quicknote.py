@@ -45,6 +45,8 @@ class Qn():
             self.__process_new_command(args)
         elif args[0] == 'edit':
             self.__process_edit_command(args)
+        elif args[0] == 'list':
+            self.__process_list_command(args)
         else:
             print(f"Unknown command 'qn {args[0]}'")
 
@@ -98,6 +100,21 @@ class Qn():
         note_path = path.join(self.data_path, f"{note_name}.md")
         open_vim(note_path)
 
+    def __process_list_command(self, args):
+        if len(args) > 2:
+            print(
+                f"'qn list takes only 1 argument. {len(args)-1} were provided."
+            )
+            return
+        if len(args) == 2 and args[1] != '-u':
+            print(f"Unknown argument {args[1]}")
+            return
+
+        if len(args) == 2 and args[1] == '-u':
+            self.__update_manifest_file()
+
+        for n in self.manifest:
+            print(n.name)
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
@@ -117,6 +134,13 @@ class Qn():
         content = QnManifest.dump(self.manifest)
         manifest_path = path.join(self.data_path, 'qn.manifest')
         FileManager.try_create_file(manifest_path, content, True)
+
+    def __update_manifest_file(self):
+        files = [f for f in listdir(self.data_path) if f.endswith('.md')]
+        self.manifest = QnManifest()
+        for f in files:
+            self.__add_to_manifest(f.split('.')[0])
+        self.__save_manifest()
 
 
 # qn manifest element
