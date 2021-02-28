@@ -1,6 +1,7 @@
 from git import Repo
 import os
-from os import path
+from os import path, environ
+from subprocess import call
 import subprocess
 
 
@@ -10,6 +11,11 @@ def ask(question):
         anwser = input(question)
         if anwser != '':
             return anwser
+
+
+def open_vim(path):
+    editor = environ.get('EDITOR', 'vim')
+    call([editor, path])
 
 
 class FileManager():
