@@ -8,7 +8,10 @@ from yamlize import Sequence, Object, Attribute
 class Qn():
     def __init__(self, data_path):
         self.data_path = path.join(data_path, 'notes')
+        if self.data_path[0] == '~':
+            self.data_path = path.expanduser(self.data_path)
         manifest_path = path.join(self.data_path, 'qn.manifest')
+        print(manifest_path)
 
         if FileManager.directory_exists(self.data_path) == False:
             FileManager.create_directory(self.data_path)
@@ -40,6 +43,8 @@ class Qn():
             return
         if args[0] == 'new':
             self.__process_new_command(args)
+        elif args[0] == 'edit':
+            self.__process_edit_command(args)
         else:
             print(f"Unknown command 'qn {args[0]}'")
 
@@ -68,28 +73,45 @@ class Qn():
             return
 
         note_path = path.join(self.data_path, f"{note_name}.md")
-        if note_path[0] == '~':
-            note_path = path.expanduser(note_path)
-
         content = f"# {note_name}"
         FileManager.try_create_file(note_path, content)
         self.__add_to_manifest(note_name)
         self.__save_manifest()
-        EDITOR = environ.get('EDITOR', 'vim')
-        call([EDITOR, note_path])
+        if silent == False:
+            open_vim(note_path)
+
+    def __process_edit_command(self, args):
+        if len(args) == 1:
+            print('Please provide name of the note you want to edit')
+            return
+        elif len(args) > 2:
+            print(
+                "'qn edit' takes only 1 argument. {len(args)-1} were provided")
+            return
+
+        note_name = args[1]
+        if self.manifest.contains(note_name) == False:
+            print(f"Unknown note name {note_name}")
+            return
+
+        print(f"note name: {note_name}")
+        note_path = path.join(self.data_path, f"{note_name}.md")
+        open_vim(note_path)
 
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
 
     def __load_manifest(self):
-        content = FileManager.load_file('~/.config/.mimir.d/qn.manifest')
+        content = FileManager.load_file(
+            path.join(self.data_path, 'qn.manifest'))
         self.manifest = QnManifest.load(content)
 
     def __add_to_manifest(self, note_name):
         n = QnManifestElement()
         n.name = note_name
         self.manifest.append(n)
+        self.__save_manifest()
 
     def __save_manifest(self):
         content = QnManifest.dump(self.manifest)
