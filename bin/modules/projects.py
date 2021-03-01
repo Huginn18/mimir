@@ -10,12 +10,6 @@ class Pm():
     def __init__(self):
         if FileManager.file_exists('~/.config/.mimir.d/pm.manifest') == False:
             manifest = PmManifest()
-
-            element = PmElement()
-            element.name = "foo"
-            element.path = "~/projects/foo"
-            manifest.append(element)
-
             content = PmManifest.dump(manifest)
             FileManager.try_create_file('~/.config/.mimir.d/pm.manifest',
                                         content)

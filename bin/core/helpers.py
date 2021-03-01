@@ -1,6 +1,7 @@
 from git import Repo
 import os
-from os import path
+from os import path, environ, remove
+from subprocess import call
 import subprocess
 
 
@@ -10,6 +11,11 @@ def ask(question):
         anwser = input(question)
         if anwser != '':
             return anwser
+
+
+def open_vim(path):
+    editor = environ.get('EDITOR', 'vim')
+    call([editor, path])
 
 
 class FileManager():
@@ -65,6 +71,12 @@ class FileManager():
         with open(full_path, 'r') as file:
             return file.read()
 
+    def delete_file(_path):
+        full_path = _path
+        if full_path[0] == '`':
+            full_path = path.expanduser(full_path)
+        remove(full_path)
+
     def __expand_path(_path):
         return path.expanduser(_path)
 
@@ -102,3 +114,23 @@ class Git():
             subprocess.check_output(['git', 'branch'
                                      ]).split()[-1].__str__().split("'")[-2]
         ])
+
+    def status(_path):
+        os.chdir(path.expanduser(_path))
+        try:
+            output = subprocess.check_output(['git', 'status'])
+            return output
+        except subprocess.CalledProcessError as e:
+            return 'fatal'
+
+    def add_all(_path):
+        os.chdir(path.expanduser(_path))
+        subprocess.check_output(['git', 'add', '.'])
+
+    def commit(_path):
+        os.chdir(path.expanduser(_path))
+        subprocess.call('git commit', shell=True)
+
+    def push(_path):
+        os.chdir(path.expanduser(_path))
+        subprocess.check_output(['git', 'push'])
