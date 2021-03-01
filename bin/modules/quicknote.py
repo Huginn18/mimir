@@ -1,4 +1,4 @@
-from core.helpers import FileManager, open_vim
+from core.helpers import FileManager, open_vim, Git, ask
 from os import path, environ, listdir, remove
 from subprocess import call
 from yamlize import Sequence, Object, Attribute
@@ -50,6 +50,8 @@ class Qn():
             self.__process_list_command(args)
         elif args[0] == 'delete':
             self.__process_delete_command(args)
+        elif args[0] == 'save':
+            self.__process_save_command(args)
         else:
             print(f"Unknown command 'qn {args[0]}'")
 
@@ -138,6 +140,25 @@ class Qn():
         FileManager.delete_file(note_path)
         print(f"Note {note_name} was deleted")
 
+    def __process_save_command(self, args):
+        if len(args) > 2:
+            print(f"'qn save' doen't take any arguments.")
+            return
+
+        status = Git.status(self.data_path)
+        if status == 'fatal':
+            print("'qn' data folder isn't part of git repository")
+            return
+        Git.add_all(self.data_path)
+        Git.commit(self.data_path)
+        while True:
+            decision = ask(
+                "Do you want to push your changes to the repo?\n[y]es/[n]o\n")
+            if decision == 'n' or decision == 'no':
+                return
+            elif decision == 'y' or decision == 'yes':
+                Git.push(self.data_path)
+                break
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===

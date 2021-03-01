@@ -114,3 +114,23 @@ class Git():
             subprocess.check_output(['git', 'branch'
                                      ]).split()[-1].__str__().split("'")[-2]
         ])
+
+    def status(_path):
+        os.chdir(path.expanduser(_path))
+        try:
+            output = subprocess.check_output(['git', 'status'])
+            return output
+        except subprocess.CalledProcessError as e:
+            return 'fatal'
+
+    def add_all(_path):
+        os.chdir(path.expanduser(_path))
+        subprocess.check_output(['git', 'add', '.'])
+
+    def commit(_path):
+        os.chdir(path.expanduser(_path))
+        subprocess.call('git commit', shell=True)
+
+    def push(_path):
+        os.chdir(path.expanduser(_path))
+        subprocess.check_output(['git', 'push'])
