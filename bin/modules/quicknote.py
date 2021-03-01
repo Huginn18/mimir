@@ -1,5 +1,5 @@
 from core.helpers import FileManager, open_vim, Git, ask
-from os import path, environ, listdir, remove
+from os import path, environ, listdir, remove, rename
 from subprocess import call
 from yamlize import Sequence, Object, Attribute
 
@@ -52,6 +52,10 @@ class Qn():
             self.__process_delete_command(args)
         elif args[0] == 'save':
             self.__process_save_command(args)
+        elif args[0] == 'rename':
+            self.__process_rename_command(args)
+        elif args[0] == 'find':
+            self.__process_find_conmmand(args)
         else:
             print(f"Unknown command 'qn {args[0]}'")
 
@@ -159,6 +163,47 @@ class Qn():
             elif decision == 'y' or decision == 'yes':
                 Git.push(self.data_path)
                 break
+
+    def __process_rename_command(self, args):
+        print(len(args))
+        if len(args) > 3:
+            print("Please provide name of the note and new name for it.")
+            return
+        if len(args) < 3:
+            print(
+                f"'qn rename takes 2 arguments. {len(args)-1} were provided.")
+            return
+
+        note_name = args[1]
+        new_note_name = args[2]
+        # note doesnt exist
+        if self.manifest.contains(note_name) == False:
+            print(f"Note {note_name} doesn't exist")
+            return
+        # new name already occupied
+        if self.manifest.contains(new_note_name):
+            print(f"Note {new_note_name} already exists")
+            return
+
+        old_note_path = path.join(self.data_path, f"{note_name}.md")
+        new_note_path = path.join(self.data_path, f"{new_note_name}.md")
+        rename(old_note_path, new_note_path)
+        self.__update_manifest_file()
+
+    def __process_find_conmmand(self, args):
+        if len(args) > 2:
+            print(f"'qn find' takes ony argument. {len(args)-1} were provided")
+            return
+
+        keyword = args[1]
+        notes = [n for n in self.manifest if keyword in n.name]
+        if len(notes) == 0:
+            print(f"No notes found containing keyword '{keyword}'")
+            return
+
+        for n in notes:
+            print(n.name)
+
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
