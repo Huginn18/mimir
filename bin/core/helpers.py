@@ -98,22 +98,24 @@ class Git():
                 break
         os.chdir(os.path.expanduser(os.path.dirname(_path)))
 
-        subprocess.check_output(
+        p = subprocess.Popen(
             ['gh', 'repo', 'create', project_name, '--confirm', privacy])
-        #
+        out, err = p.communicate()
+        print(out)
+
     def first_commit(_path):
         readme_path = path.expanduser(path.join(_path, 'readme.md'))
         with open(readme_path, 'w') as file:
             file.write(f"# {readme_path.split('/')[-1]}")
 
         os.chdir(path.expanduser(_path))
-        subprocess.check_output(['git', 'add', '.'])
-        subprocess.check_output(['git', 'commit', '-m', "'initial commit'"])
-        subprocess.check_output([
-            'git', 'push', '--set-upstream', 'origin',
-            subprocess.check_output(['git', 'branch'
-                                     ]).split()[-1].__str__().split("'")[-2]
-        ])
+        p = subprocess.Popen(['git', 'add', '.'])
+        out, err = p.communicate()
+        p = subprocess.Popen(['git', 'commit', '-m', "'initial commit'"])
+        out, err = p.communicate()
+        p = subprocess.Popen(
+            ['git', 'push', '--set-upstream', 'origin', 'main'])
+        p.wait()
 
     def status(_path):
         os.chdir(path.expanduser(_path))
