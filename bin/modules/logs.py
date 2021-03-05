@@ -1,4 +1,5 @@
-from core.helpers import FileManager
+from core.helpers import FileManager, open_vim
+from datetime import datetime
 from os import path
 from yamlize import Object, Attribute, Sequence
 
@@ -28,7 +29,33 @@ class Log():
         open <date [dd-mm-yyyy]>    | opens log file with specified date
         list <date [mm-yyyy]>       | lists all the logs for the specified month
         """
-        pass
+        args = arg.split()
+
+        if len(args) == 0:
+            print('Please provide command for the log module.')
+
+        if args[0] == 'new':
+            self.process_new_command()
+        else:
+            print(f"Unknown command 'log {arg}'.")
+
+    def process_new_command(self):
+        now = datetime.now()
+        date = now.strftime('%d-%m-%Y')
+        time = now.strftime('%H:%M')
+        print(f"DATE: {date}\nTIME: {time}")
+
+        file_name = f"{date}.md"
+        file_path = path.join(self.data_path, file_name)
+
+        if FileManager.file_exists(file_path):
+            content = f"\n\n# {time}"
+            FileManager.append_file(file_path, content)
+            open_vim(file_path, True)
+        else:
+            content = f"# {time}"
+            FileManager.try_create_file(file_path, content, False)
+            open_vim(file_path, True)
 
     def process_pm_command(self, project_name, project_path, args):
         """

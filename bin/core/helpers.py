@@ -13,9 +13,12 @@ def ask(question):
             return anwser
 
 
-def open_vim(path):
+def open_vim(path, end_of_file=False):
     editor = environ.get('EDITOR', 'vim')
-    call([editor, path])
+    if end_of_file:
+        call([editor, '+', path])
+    else:
+        call([editor, path])
 
 
 class FileManager():
@@ -76,6 +79,14 @@ class FileManager():
         if full_path[0] == '`':
             full_path = path.expanduser(full_path)
         remove(full_path)
+
+    def append_file(_path, content):
+        full_path = _path
+        if full_path[0] == '~':
+            full_path = path.expanduser(full_path)
+
+        with open(full_path, 'a') as file:
+            return file.write(content)
 
     def __expand_path(_path):
         return path.expanduser(_path)

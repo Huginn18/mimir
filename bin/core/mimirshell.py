@@ -68,6 +68,7 @@ class MimirShell(Cmd):
         if self.log == None:
             print("'log' module isn't initialized.")
             return
+        self.log.process_command(arg)
 
     def help_log(self):
         print(self.log.process_command.__doc__)
@@ -76,6 +77,7 @@ class MimirShell(Cmd):
         if self.log == None:
             print("'log' module isn't initialized.")
             return
+        print("NOT IMPLEMENTED")
 
     def help_logp(self):
         print(self.log.process_pm_command.__doc__)
