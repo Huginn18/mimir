@@ -250,6 +250,8 @@ class Qnp():
 
         if args[1] == 'new':
             Qnp.__process_new_command(data_path, project_name, manifest, args)
+        if args[1] == 'list':
+            Qnp.__process_list_command(data_path, project_name, manifest, args)
         else:
             print(f"Unkown command {args[1]}")
 
@@ -287,6 +289,22 @@ class Qnp():
         if silent == False:
             open_vim(note_path)
 
+    def __process_list_command(data_path, project_name, manifest, args):
+        if len(args) > 3:
+            print(
+                f"'qn list takes only 1 argument. {len(args)-1} were provided."
+            )
+            return
+        if len(args) == 3 and args[2] != '-u':
+            print(f"Unknown argument {args[2]}")
+            return
+
+        if len(args) == 3 and args[2] == '-u':
+            Qnp.__update_manifest_file(data_path, manifest)
+
+        for n in manifest:
+            print(n.name)
+
     def __init_project_notes(data_path, manifest_path):
         if FileManager.directory_exists(data_path) == False:
             FileManager.create_directory(data_path)
@@ -311,10 +329,16 @@ class Qnp():
         Qnp.__save_manifest(data_path, manifest)
 
     def __save_manifest(data_path, manifest):
-        print(f"NOTE 0 NAME: {manifest[0].name}")
         content = QnManifest.dump(manifest)
         manifest_path = path.join(data_path, 'qn.manifest')
         FileManager.try_create_file(manifest_path, content, True)
+
+    def __update_manifest_file(data_path, manifest):
+        files = [f for f in listdir(data_path) if f.endswith('.md')]
+        manifest = QnManifest()
+        for f in files:
+            Qnp.__add_to_manifest(manifest, data_path, f.split('.')[0])
+        Qnp.__save_manifest(data_path, manifest)
 
 
 # qn manifest element
