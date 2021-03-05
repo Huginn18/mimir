@@ -32,7 +32,7 @@ class Log():
 
     def process_pm_command(self, project_name, project_path, args):
         """
-        log help
+        logp help
 
         <project name> new             | opens log file for the day or if it doesn't exist file will be created
         <project name> open <date [dd-mm-yyyy]>    | opens log file with specified date

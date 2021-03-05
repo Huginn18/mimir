@@ -47,6 +47,10 @@ class MimirShell(Cmd):
         self.qn.process_command(arg)
 
     def do_qnp(self, arg):
+        if self.qn == None:
+            print("'qn' module is not initialized.")
+            return
+
         args = arg.split()
         project = self.pm.get_project_from_manifest(args[0])
         if project == None:
@@ -59,6 +63,22 @@ class MimirShell(Cmd):
 
     def help_qn(self):
         print(self.qn.process_command.__doc__)
+
+    def do_log(self, arg):
+        if self.log == None:
+            print("'log' module isn't initialized.")
+            return
+
+    def help_log(self):
+        print(self.log.process_command.__doc__)
+
+    def do_logp(self, arg):
+        if self.log == None:
+            print("'log' module isn't initialized.")
+            return
+
+    def help_logp(self):
+        print(self.log.process_pm_command.__doc__)
 
 
 # === == = == === == = == ===
