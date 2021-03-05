@@ -1,5 +1,6 @@
 from cmd import Cmd
 from core.helpers import FileManager, ask
+from modules.logs import Log
 from modules.projects import Pm
 from modules.quicknote import Qn, Qnp
 from yamlize import Attribute, Object
@@ -67,9 +68,10 @@ class MimirShell(Cmd):
     def __init_modules(self):
         self.__init_pm_module()
         self.__init_qn_module()
+        self.__init_log_module()
 
         config_content = Config.dump(self.config)
-        FileManager.try_create_file('~/.config/.mimir', config_content)
+        FileManager.try_create_file('~/.config/.mimir', config_content, True)
 
     def __init_pm_module(self):
         status = self.config.pm_status
@@ -123,8 +125,53 @@ class MimirShell(Cmd):
 
         self.config.qn_data_path = path
 
+    def __init_log_module(self):
+        status = self.config.log_status
+
+        if status == 'default':
+            use = False
+            while True:
+                decision = ask(
+                    'Do you want to initialise log module?\n[y]es/[n]o\n')
+                if decision == 'y' or decision == 'yes':
+                    use = True
+                    break
+                elif decision == 'n' or decision == 'no':
+                    break
+            if use:
+                status = 'True'
+                self.__init_log_moudle_data_path()
+                self.log = Log(self.config.log_data_path)
+        elif status == 'True':
+            self.log = Log(self.config.log_data_path)
+        else:
+            self.log = None
+
+        self.config.log_status = status
+
+    def __init_log_moudle_data_path(self):
+        path = '~/.mimir'
+        use_custom_path = False
+        while True:
+            decision = ask(
+                'Do you want to set custom loction for logs directory?\nDefault: ~/.mimir\n[y]es/[n]o'
+            )
+            if decision == 'y' or decision == 'yes':
+                use_custom_path = True
+                break
+            elif decision == 'n' or decision == 'no':
+                break
+        if use_custom_path:
+            path = ask('Please provide new path\n')
+
+        self.config.log_data_path = path
+
 
 class Config(Object):
     pm_status = Attribute(type=str, default='default')
+
     qn_status = Attribute(type=str, default='default')
     qn_data_path = Attribute(type=str, default='~/.mimir')
+
+    log_status = Attribute(type=str, default='default')
+    log_data_path = Attribute(type=str, default='~/.mimir/')
