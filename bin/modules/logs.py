@@ -15,8 +15,6 @@ class Log():
         log help
 
         new             | opens log file for the day or if it doesn't exist file will be created
-        open <date [dd-mm-yyyy]>    | opens log file with specified date
-        list <date [mm-yyyy]>       | lists all the logs for the specified month
         """
         args = arg.split()
 
@@ -55,8 +53,6 @@ class Log():
         logp help
 
         <project name> new             | opens log file for the day or if it doesn't exist file will be created
-        <project name> open <date [dd-mm-yyyy]>    | opens log file with specified date
-        <project name> list <date [mm-yyyy]>       | lists all the logs for the specified month
         """
         if len(args) == 1:
             print('Please provide command for the log module.')
