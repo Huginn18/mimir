@@ -193,6 +193,10 @@ class Qn():
             print(f"'qn find' takes ony argument. {len(args)-1} were provided")
             return
 
+        if len(args) == 1:
+            print('Please provide keyword for the search')
+            return
+
         keyword = args[1]
         notes = [n for n in self.manifest if keyword in n.name]
         if len(notes) == 0:
@@ -279,6 +283,9 @@ class Qnp():
         elif args[1] == 'rename':
             Qnp.__process_rename_command(data_path, project_name, manifest,
                                          args)
+        elif args[1] == 'find':
+            Qnp.__process_find_conmmand(data_path, project_name, manifest,
+                                        args)
         else:
             print(f"Unkown command {args[1]}")
 
@@ -415,6 +422,23 @@ class Qnp():
         new_note_path = path.join(data_path, f"{new_note_name}.md")
         rename(old_note_path, new_note_path)
         Qnp.__update_manifest_file(data_path, manifest)
+
+    def __process_find_conmmand(data_path, project_name, manifest, args):
+        if len(args) > 2:
+            print(f"'qn find' takes ony argument. {len(args)-1} were provided")
+            return
+        if len(args) == 2:
+            print("Please provide keyword for the search")
+            return
+
+        keyword = args[2]
+        notes = [n for n in manifest if keyword in n.name]
+        if len(notes) == 0:
+            print(f"No notes found containing keyword '{keyword}'")
+            return
+
+        for n in notes:
+            print(n.name)
 
     def __init_project_notes(data_path, manifest_path):
         if FileManager.directory_exists(data_path) == False:
