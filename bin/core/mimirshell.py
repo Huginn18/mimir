@@ -1,7 +1,7 @@
 from cmd import Cmd
 from core.helpers import FileManager, ask
 from modules.projects import Pm
-from modules.quicknote import Qn
+from modules.quicknote import Qn, Qnp
 from yamlize import Attribute, Object
 
 
@@ -44,6 +44,11 @@ class MimirShell(Cmd):
             print("'qn' module is not initialized.")
             return
         self.qn.process_command(arg)
+
+    def do_qnp(self, arg):
+        args = arg.split()
+        project = self.pm.get_project_from_manifest(args[0])
+        Qnp.process_command(project.name, project.path, args)
 
     def help_qn(self):
         print(self.qn.process_command.__doc__)

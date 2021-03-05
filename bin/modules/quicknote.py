@@ -237,6 +237,31 @@ class Qn():
         self.__save_manifest()
 
 
+class Qnp():
+    def process_command(project_name, project_path, args):
+        data_path = path.join(project_path, 'notes')
+        if data_path[0] == '~':
+            data_path = path.expanduser(data_path)
+        manifest_path = path.join(data_path, 'qn.manifest')
+
+        Qnp.__init_project_notes(data_path, manifest_path)
+
+        manifest = Qnp.__load_manifest(manifest_path)
+    def __init_project_notes(data_path, manifest_path):
+        if FileManager.directory_exists(data_path) == False:
+            FileManager.create_directory(data_path)
+
+        if FileManager.file_exists(manifest_path) == False:
+            manifest = QnManifest()
+            content = QnManifest.dump(manifest)
+            FileManager.try_create_file(manifest_path, content)
+
+    def __load_manifest(manifest_path):
+        print(manifest_path)
+        content = FileManager.load_file(manifest_path)
+        return QnManifest.load(content)
+
+
 # qn manifest element
 class QnManifestElement(Object):
     name = Attribute(type=str)
