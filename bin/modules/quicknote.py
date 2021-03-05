@@ -11,7 +11,6 @@ class Qn():
         if self.data_path[0] == '~':
             self.data_path = path.expanduser(self.data_path)
         manifest_path = path.join(self.data_path, 'qn.manifest')
-        print(manifest_path)
 
         if FileManager.directory_exists(self.data_path) == False:
             FileManager.create_directory(self.data_path)
@@ -204,6 +203,7 @@ class Qn():
         for n in notes:
             print(n.name)
 
+
 # === == = == === == = == ===
 #       REGION: Manifest
 # === == = == === == = == ===
@@ -247,6 +247,46 @@ class Qnp():
         Qnp.__init_project_notes(data_path, manifest_path)
 
         manifest = Qnp.__load_manifest(manifest_path)
+
+        if args[1] == 'new':
+            Qnp.__process_new_command(data_path, project_name, manifest, args)
+        else:
+            print(f"Unkown command {args[1]}")
+
+    def __process_new_command(data_path, project_name, manifest, args):
+        note_name = args[2]
+        print(len(args))
+        if len(args) == 4:
+            print("Please provide 'note name'")
+            return
+        if len(args) > 5:
+            print(
+                f"'qn new' takes up to 2 arguments. {len(args)-1} were provided."
+            )
+        if len(args) == 4 and args[3] != '-s':
+            print(
+                f"Unknown argument {args[3]}. Only known flag argument is '-s'."
+            )
+
+        note_name = args[2]
+        silent = len(args) == 4
+        print(f"note: {note_name}\nsilent: {silent}")
+
+        if FileManager.file_exists(path.join(data_path, note_name)):
+            print(f"File {note_name}.md already exists")
+            return
+        if manifest.contains(note_name):
+            print(f"Note already exists in the manifest")
+            return
+
+        note_path = path.join(data_path, f"{note_name}.md")
+        content = f"# {project_name} - {note_name}"
+        FileManager.try_create_file(note_path, content)
+        Qnp.__add_to_manifest(manifest, data_path, note_name)
+
+        if silent == False:
+            open_vim(note_path)
+
     def __init_project_notes(data_path, manifest_path):
         if FileManager.directory_exists(data_path) == False:
             FileManager.create_directory(data_path)
@@ -256,10 +296,25 @@ class Qnp():
             content = QnManifest.dump(manifest)
             FileManager.try_create_file(manifest_path, content)
 
+# === == = == === == = == ===
+#       REGION: Manifest
+# === == = == === == = == ===
+
     def __load_manifest(manifest_path):
-        print(manifest_path)
         content = FileManager.load_file(manifest_path)
         return QnManifest.load(content)
+
+    def __add_to_manifest(manifest, data_path, note_name):
+        n = QnManifestElement()
+        n.name = note_name
+        manifest.append(n)
+        Qnp.__save_manifest(data_path, manifest)
+
+    def __save_manifest(data_path, manifest):
+        print(f"NOTE 0 NAME: {manifest[0].name}")
+        content = QnManifest.dump(manifest)
+        manifest_path = path.join(data_path, 'qn.manifest')
+        FileManager.try_create_file(manifest_path, content, True)
 
 
 # qn manifest element
