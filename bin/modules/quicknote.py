@@ -275,6 +275,8 @@ class Qnp():
         elif args[1] == 'delete':
             Qnp.__process_delete_command(data_path, project_name, manifest,
                                          args)
+        elif args[1] == 'save':
+            Qnp.__process_save_command(data_path, project_name, manifest, args)
         else:
             print(f"Unkown command {args[1]}")
 
@@ -366,6 +368,26 @@ class Qnp():
         FileManager.delete_file(note_path)
         print(f"Note {note_name} was deleted")
         Qnp.__save_manifest(data_path, manifest)
+
+    def __process_save_command(data_path, project_name, manifest, args):
+        if len(args) > 3:
+            print(f"'qn save' doen't take any arguments.")
+            return
+
+        status = Git.status(data_path)
+        if status == 'fatal':
+            print("'qn' data folder isn't part of git repository")
+            return
+        Git.add_all(data_path)
+        Git.commit(data_path)
+        while True:
+            decision = ask(
+                "Do you want to push your changes to the repo?\n[y]es/[n]o\n")
+            if decision == 'n' or decision == 'no':
+                return
+            elif decision == 'y' or decision == 'yes':
+                Git.push(data_path)
+                break
 
     def __init_project_notes(data_path, manifest_path):
         if FileManager.directory_exists(data_path) == False:
