@@ -11,7 +11,6 @@ class Qn():
         if self.data_path[0] == '~':
             self.data_path = path.expanduser(self.data_path)
         manifest_path = path.join(self.data_path, 'qn.manifest')
-        print(manifest_path)
 
         if FileManager.directory_exists(self.data_path) == False:
             FileManager.create_directory(self.data_path)
@@ -165,7 +164,6 @@ class Qn():
                 break
 
     def __process_rename_command(self, args):
-        print(len(args))
         if len(args) > 3:
             print("Please provide name of the note and new name for it.")
             return
@@ -195,6 +193,10 @@ class Qn():
             print(f"'qn find' takes ony argument. {len(args)-1} were provided")
             return
 
+        if len(args) == 1:
+            print('Please provide keyword for the search')
+            return
+
         keyword = args[1]
         notes = [n for n in self.manifest if keyword in n.name]
         if len(notes) == 0:
@@ -203,6 +205,7 @@ class Qn():
 
         for n in notes:
             print(n.name)
+
 
 # === == = == === == = == ===
 #       REGION: Manifest
@@ -235,6 +238,247 @@ class Qn():
         notes = [n for n in self.manifest if n.name != note_name]
         self.manifest = QnManifest(notes)
         self.__save_manifest()
+
+
+class Qnp():
+    def process_command(project_name, project_path, args):
+        """
+        qnp help
+
+        Module for note taking in projects.
+
+        Commands list:
+            <project name> new <note name> <-s>                | creates new note and opens it in vim. If -s argument is used vim won't be opened.
+            <project name> edit <note name>                    | opens note in vim
+            <project name> list <-u>                           | lists all tracked notes. If -u argument is used manifest will be updated before printing list
+            <project name> delete <note name>                  | deletes note
+            <project name> save                                | commits all changes and pushes them to repo. Available only if git support is turned on.
+            <project name> rename <note name> <new note name>  | renames note to 'new note name'
+            <project name> find <keyword>                      | prints list of all the notes containing 'keyoword' in their name
+        """
+        data_path = path.join(project_path, 'notes')
+        if data_path[0] == '~':
+            data_path = path.expanduser(data_path)
+        manifest_path = path.join(data_path, 'qn.manifest')
+
+        Qnp.__init_project_notes(data_path, manifest_path)
+
+        manifest = Qnp.__load_manifest(manifest_path)
+
+        if len(args) == 1:
+            print(f"Please provide you want to perform")
+            return
+
+        if args[1] == 'new':
+            Qnp.__process_new_command(data_path, project_name, manifest, args)
+        elif args[1] == 'list':
+            Qnp.__process_list_command(data_path, project_name, manifest, args)
+        elif args[1] == 'edit':
+            Qnp.__process_edit_command(data_path, project_name, manifest, args)
+        elif args[1] == 'delete':
+            Qnp.__process_delete_command(data_path, project_name, manifest,
+                                         args)
+        elif args[1] == 'save':
+            Qnp.__process_save_command(data_path, project_name, manifest, args)
+        elif args[1] == 'rename':
+            Qnp.__process_rename_command(data_path, project_name, manifest,
+                                         args)
+        elif args[1] == 'find':
+            Qnp.__process_find_conmmand(data_path, project_name, manifest,
+                                        args)
+        else:
+            print(f"Unkown command {args[1]}")
+
+    def __process_new_command(data_path, project_name, manifest, args):
+        note_name = args[2]
+        print(len(args))
+        if len(args) == 4:
+            print("Please provide 'note name'")
+            return
+        if len(args) > 5:
+            print(
+                f"'qn new' takes up to 2 arguments. {len(args)-1} were provided."
+            )
+        if len(args) == 4 and args[3] != '-s':
+            print(
+                f"Unknown argument {args[3]}. Only known flag argument is '-s'."
+            )
+
+        note_name = args[2]
+        silent = len(args) == 4
+        print(f"note: {note_name}\nsilent: {silent}")
+
+        if FileManager.file_exists(path.join(data_path, note_name)):
+            print(f"File {note_name}.md already exists")
+            return
+        if manifest.contains(note_name):
+            print(f"Note already exists in the manifest")
+            return
+
+        note_path = path.join(data_path, f"{note_name}.md")
+        content = f"# {project_name} - {note_name}"
+        FileManager.try_create_file(note_path, content)
+        Qnp.__add_to_manifest(manifest, data_path, note_name)
+
+        if silent == False:
+            open_vim(note_path)
+
+    def __process_edit_command(data_path, project_name, manifest, args):
+        if len(args) == 2:
+            print('Please provide name of the note you want to edit')
+            return
+        elif len(args) > 3:
+            print(
+                "'qn edit' takes only 1 argument. {len(args)-1} were provided")
+            return
+
+        note_name = args[2]
+        if manifest.contains(note_name) == False:
+            print(f"Unknown note name {note_name}")
+            return
+
+        print(f"note name: {note_name}")
+        note_path = path.join(data_path, f"{note_name}.md")
+        open_vim(note_path)
+
+    def __process_list_command(data_path, project_name, manifest, args):
+        if len(args) > 3:
+            print(
+                f"'qn list takes only 1 argument. {len(args)-1} were provided."
+            )
+            return
+        if len(args) == 3 and args[2] != '-u':
+            print(f"Unknown argument {args[2]}")
+            return
+
+        if len(args) == 3 and args[2] == '-u':
+            Qnp.__update_manifest_file(data_path, manifest)
+
+        for n in manifest:
+            print(n.name)
+
+    def __process_delete_command(data_path, project_name, manifest, args):
+        if len(args) == 2:
+            print('Please provide note name to be deleted.')
+            return
+        elif len(args) > 3:
+            print(
+                f"'qn delete` takes one argument. {len(args)-1} were provided."
+            )
+            return
+
+        note_name = args[2]
+        if manifest.contains(note_name) == False:
+            print(f"Unknown note {note_name}")
+            return
+
+        manifest = Qnp.__remove_note_from_manifest(note_name, manifest)
+        note_path = path.join(data_path, f"{note_name}.md")
+        FileManager.delete_file(note_path)
+        print(f"Note {note_name} was deleted")
+        Qnp.__save_manifest(data_path, manifest)
+
+    def __process_save_command(data_path, project_name, manifest, args):
+        if len(args) > 3:
+            print(f"'qn save' doen't take any arguments.")
+            return
+
+        status = Git.status(data_path)
+        if status == 'fatal':
+            print("'qn' data folder isn't part of git repository")
+            return
+        Git.add_all(data_path)
+        Git.commit(data_path)
+        while True:
+            decision = ask(
+                "Do you want to push your changes to the repo?\n[y]es/[n]o\n")
+            if decision == 'n' or decision == 'no':
+                return
+            elif decision == 'y' or decision == 'yes':
+                Git.push(data_path)
+                break
+
+    def __process_rename_command(data_path, project_name, manifest, args):
+        if len(args) > 4:
+            print("Please provide name of the note and new name for it.")
+            return
+        if len(args) < 4:
+            print(
+                f"'qn rename takes 2 arguments. {len(args)-1} were provided.")
+            return
+
+        note_name = args[2]
+        new_note_name = args[3]
+        # note doesnt exist
+        if manifest.contains(note_name) == False:
+            print(f"Note {note_name} doesn't exist")
+            return
+        # new name already occupied
+        if manifest.contains(new_note_name):
+            print(f"Note {new_note_name} already exists")
+            return
+
+        old_note_path = path.join(data_path, f"{note_name}.md")
+        new_note_path = path.join(data_path, f"{new_note_name}.md")
+        rename(old_note_path, new_note_path)
+        Qnp.__update_manifest_file(data_path, manifest)
+
+    def __process_find_conmmand(data_path, project_name, manifest, args):
+        if len(args) > 2:
+            print(f"'qn find' takes ony argument. {len(args)-1} were provided")
+            return
+        if len(args) == 2:
+            print("Please provide keyword for the search")
+            return
+
+        keyword = args[2]
+        notes = [n for n in manifest if keyword in n.name]
+        if len(notes) == 0:
+            print(f"No notes found containing keyword '{keyword}'")
+            return
+
+        for n in notes:
+            print(n.name)
+
+    def __init_project_notes(data_path, manifest_path):
+        if FileManager.directory_exists(data_path) == False:
+            FileManager.create_directory(data_path)
+
+        if FileManager.file_exists(manifest_path) == False:
+            manifest = QnManifest()
+            content = QnManifest.dump(manifest)
+            FileManager.try_create_file(manifest_path, content)
+
+# === == = == === == = == ===
+#       REGION: Manifest
+# === == = == === == = == ===
+
+    def __load_manifest(manifest_path):
+        content = FileManager.load_file(manifest_path)
+        return QnManifest.load(content)
+
+    def __add_to_manifest(manifest, data_path, note_name):
+        n = QnManifestElement()
+        n.name = note_name
+        manifest.append(n)
+        Qnp.__save_manifest(data_path, manifest)
+
+    def __save_manifest(data_path, manifest):
+        content = QnManifest.dump(manifest)
+        manifest_path = path.join(data_path, 'qn.manifest')
+        FileManager.try_create_file(manifest_path, content, True)
+
+    def __update_manifest_file(data_path, manifest):
+        files = [f for f in listdir(data_path) if f.endswith('.md')]
+        manifest = QnManifest()
+        for f in files:
+            Qnp.__add_to_manifest(manifest, data_path, f.split('.')[0])
+        Qnp.__save_manifest(data_path, manifest)
+
+    def __remove_note_from_manifest(note_name, manifest):
+        notes = [n for n in manifest if n.name != note_name]
+        manifest = QnManifest(notes)
+        return manifest
 
 
 # qn manifest element

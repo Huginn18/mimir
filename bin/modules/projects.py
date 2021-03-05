@@ -143,7 +143,7 @@ class Pm():
             print(f"Unknown project {project_name}")
             return
 
-        project = self.__get_project_from_manifest(project_name)
+        project = self.get_project_from_manifest(project_name)
         delete_dir = False
         while True:
             decision = helpers.ask(
@@ -168,8 +168,10 @@ class Pm():
 #       REGION: Manifest
 # === == = == === == = == ===
 
-    def __get_project_from_manifest(self, project_name):
+    def get_project_from_manifest(self, project_name):
         projects = [p for p in self.manifest if p.name == project_name]
+        if len(projects) == 0:
+            return None
         return projects[0]
 
     def __project_in_manifest(self, project_name):
