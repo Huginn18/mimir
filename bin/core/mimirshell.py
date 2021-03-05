@@ -50,6 +50,9 @@ class MimirShell(Cmd):
         project = self.pm.get_project_from_manifest(args[0])
         Qnp.process_command(project.name, project.path, args)
 
+    def help_qnp(self):
+        print(Qnp.process_command.__doc__)
+
     def help_qn(self):
         print(self.qn.process_command.__doc__)
 

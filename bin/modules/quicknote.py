@@ -239,6 +239,20 @@ class Qn():
 
 class Qnp():
     def process_command(project_name, project_path, args):
+        """
+        qnp help
+
+        Module for note taking in projects.
+
+        Commands list:
+            <project name> new <note name> <-s>                | creates new note and opens it in vim. If -s argument is used vim won't be opened.
+            <project name> edit <note name>                    | opens note in vim
+            <project name> list <-u>                           | lists all tracked notes. If -u argument is used manifest will be updated before printing list
+            <project name> delete <note name>                  | deletes note
+            <project name> save                                | commits all changes and pushes them to repo. Available only if git support is turned on.
+            <project name> rename <note name> <new note name>  | renames note to 'new note name'
+            <project name> find <keyword>                      | prints list of all the notes containing 'keyoword' in their name
+        """
         data_path = path.join(project_path, 'notes')
         if data_path[0] == '~':
             data_path = path.expanduser(data_path)
