@@ -262,12 +262,19 @@ class Qnp():
 
         manifest = Qnp.__load_manifest(manifest_path)
 
+        if len(args) == 1:
+            print(f"Please provide you want to perform")
+            return
+
         if args[1] == 'new':
             Qnp.__process_new_command(data_path, project_name, manifest, args)
         elif args[1] == 'list':
             Qnp.__process_list_command(data_path, project_name, manifest, args)
         elif args[1] == 'edit':
             Qnp.__process_edit_command(data_path, project_name, manifest, args)
+        elif args[1] == 'delete':
+            Qnp.__process_delete_command(data_path, project_name, manifest,
+                                         args)
         else:
             print(f"Unkown command {args[1]}")
 
@@ -339,6 +346,27 @@ class Qnp():
         for n in manifest:
             print(n.name)
 
+    def __process_delete_command(data_path, project_name, manifest, args):
+        if len(args) == 2:
+            print('Please provide note name to be deleted.')
+            return
+        elif len(args) > 3:
+            print(
+                f"'qn delete` takes one argument. {len(args)-1} were provided."
+            )
+            return
+
+        note_name = args[2]
+        if manifest.contains(note_name) == False:
+            print(f"Unknown note {note_name}")
+            return
+
+        manifest = Qnp.__remove_note_from_manifest(note_name, manifest)
+        note_path = path.join(data_path, f"{note_name}.md")
+        FileManager.delete_file(note_path)
+        print(f"Note {note_name} was deleted")
+        Qnp.__save_manifest(data_path, manifest)
+
     def __init_project_notes(data_path, manifest_path):
         if FileManager.directory_exists(data_path) == False:
             FileManager.create_directory(data_path)
@@ -373,6 +401,11 @@ class Qnp():
         for f in files:
             Qnp.__add_to_manifest(manifest, data_path, f.split('.')[0])
         Qnp.__save_manifest(data_path, manifest)
+
+    def __remove_note_from_manifest(note_name, manifest):
+        notes = [n for n in manifest if n.name != note_name]
+        manifest = QnManifest(notes)
+        return manifest
 
 
 # qn manifest element
