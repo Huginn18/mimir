@@ -48,6 +48,9 @@ class MimirShell(Cmd):
     def do_qnp(self, arg):
         args = arg.split()
         project = self.pm.get_project_from_manifest(args[0])
+        if project == None:
+            print(f"Unknown project {args[0]}")
+            return
         Qnp.process_command(project.name, project.path, args)
 
     def help_qnp(self):

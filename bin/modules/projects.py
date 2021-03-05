@@ -170,6 +170,8 @@ class Pm():
 
     def get_project_from_manifest(self, project_name):
         projects = [p for p in self.manifest if p.name == project_name]
+        if len(projects) == 0:
+            return None
         return projects[0]
 
     def __project_in_manifest(self, project_name):

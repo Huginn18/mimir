@@ -264,8 +264,10 @@ class Qnp():
 
         if args[1] == 'new':
             Qnp.__process_new_command(data_path, project_name, manifest, args)
-        if args[1] == 'list':
+        elif args[1] == 'list':
             Qnp.__process_list_command(data_path, project_name, manifest, args)
+        elif args[1] == 'edit':
+            Qnp.__process_edit_command(data_path, project_name, manifest, args)
         else:
             print(f"Unkown command {args[1]}")
 
@@ -302,6 +304,24 @@ class Qnp():
 
         if silent == False:
             open_vim(note_path)
+
+    def __process_edit_command(data_path, project_name, manifest, args):
+        if len(args) == 2:
+            print('Please provide name of the note you want to edit')
+            return
+        elif len(args) > 3:
+            print(
+                "'qn edit' takes only 1 argument. {len(args)-1} were provided")
+            return
+
+        note_name = args[2]
+        if manifest.contains(note_name) == False:
+            print(f"Unknown note name {note_name}")
+            return
+
+        print(f"note name: {note_name}")
+        note_path = path.join(data_path, f"{note_name}.md")
+        open_vim(note_path)
 
     def __process_list_command(data_path, project_name, manifest, args):
         if len(args) > 3:
