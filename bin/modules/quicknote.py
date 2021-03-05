@@ -164,7 +164,6 @@ class Qn():
                 break
 
     def __process_rename_command(self, args):
-        print(len(args))
         if len(args) > 3:
             print("Please provide name of the note and new name for it.")
             return
@@ -277,6 +276,9 @@ class Qnp():
                                          args)
         elif args[1] == 'save':
             Qnp.__process_save_command(data_path, project_name, manifest, args)
+        elif args[1] == 'rename':
+            Qnp.__process_rename_command(data_path, project_name, manifest,
+                                         args)
         else:
             print(f"Unkown command {args[1]}")
 
@@ -388,6 +390,31 @@ class Qnp():
             elif decision == 'y' or decision == 'yes':
                 Git.push(data_path)
                 break
+
+    def __process_rename_command(data_path, project_name, manifest, args):
+        if len(args) > 4:
+            print("Please provide name of the note and new name for it.")
+            return
+        if len(args) < 4:
+            print(
+                f"'qn rename takes 2 arguments. {len(args)-1} were provided.")
+            return
+
+        note_name = args[2]
+        new_note_name = args[3]
+        # note doesnt exist
+        if manifest.contains(note_name) == False:
+            print(f"Note {note_name} doesn't exist")
+            return
+        # new name already occupied
+        if manifest.contains(new_note_name):
+            print(f"Note {new_note_name} already exists")
+            return
+
+        old_note_path = path.join(data_path, f"{note_name}.md")
+        new_note_path = path.join(data_path, f"{new_note_name}.md")
+        rename(old_note_path, new_note_path)
+        Qnp.__update_manifest_file(data_path, manifest)
 
     def __init_project_notes(data_path, manifest_path):
         if FileManager.directory_exists(data_path) == False:
