@@ -77,7 +77,15 @@ class MimirShell(Cmd):
         if self.log == None:
             print("'log' module isn't initialized.")
             return
-        print("NOT IMPLEMENTED")
+
+        args = arg.split()
+        project = self.pm.get_project_from_manifest(args[0])
+        if project == None:
+            print(f"Unknown project {args[0]}")
+            return
+
+        print(project.path)
+        self.log.process_pm_command(project.name, project.path, args)
 
     def help_logp(self):
         print(self.log.process_pm_command.__doc__)
